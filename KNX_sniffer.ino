@@ -202,21 +202,42 @@ void printHeader(){
 void printData(){
     byte pa1 = telegram[1] >> 4;
     byte pa2 = telegram[1] & B00001111;
-    byte ga1 = telegram[3] >> 3;
-    byte ga2 = telegram[3] & B00000111;
+    byte pa3 = telegram[2];
+    bool ga_pa = telegram[5] >> 7; //Mask 10000000, 1: ga, 0: pa
+    byte ga_pa1 = 0;
+    byte ga_pa2 = 0;
+    byte ga_pa3 = 0;
+    if(ga_pa){
+        ga_pa1 = telegram[3] >> 3;
+        ga_pa2 = telegram[3] & B00000111;
+        ga_pa3 = telegram[4];
+    }else{
+        ga_pa1 = telegram[3] >> 4;
+        ga_pa2 = telegram[3] & B00001111;
+        ga_pa3 = telegram[4];
+    }
+    
     byte firstDataByte = telegram[7] & B00111111; //use only last 6 bits
 #ifdef PRINT_PA_GA
     DEBUGSERIAL.print(pa1, DEC);
     DEBUGSERIAL.print(".");
     DEBUGSERIAL.print(pa2, DEC);
     DEBUGSERIAL.print(".");
-    DEBUGSERIAL.print(telegram[2], DEC);
+    DEBUGSERIAL.print(pa3, DEC);
     DEBUGSERIAL.print("\t");
-    DEBUGSERIAL.print(ga1, DEC);
-    DEBUGSERIAL.print("/");
-    DEBUGSERIAL.print(ga2, DEC);
-    DEBUGSERIAL.print("/");
-    DEBUGSERIAL.print(telegram[4], DEC);
+    if(ga_pa){ //1: ga "/", 0: pa "."
+        DEBUGSERIAL.print(ga_pa1, DEC);
+        DEBUGSERIAL.print("/");
+        DEBUGSERIAL.print(ga_pa2, DEC);
+        DEBUGSERIAL.print("/");
+        DEBUGSERIAL.print(ga_pa3, DEC);
+    }else{
+        DEBUGSERIAL.print(ga_pa1, DEC);
+        DEBUGSERIAL.print(".");
+        DEBUGSERIAL.print(ga_pa2, DEC);
+        DEBUGSERIAL.print(".");
+        DEBUGSERIAL.print(ga_pa3, DEC);
+    }
     if(ga1 > 9 && telegram[4] > 99){
         DEBUGSERIAL.print(" ");
     }else{
